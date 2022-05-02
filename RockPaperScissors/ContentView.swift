@@ -8,46 +8,88 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State var choices = ["Rock", "Paper", "Scissors"]
-    @State var shouldWin: Bool = true
+    @State var showingScore = false
     @State var winningChoice = Int.random(in: 0...2)
+    @State var losingChoice = Int.random(in: 0...2)
     @State var scoreTitle = ""
     @State var points: Int = 0
+    @State var wantsToWin = Bool.random()
+    var choices = ["Rock", "Paper", "Scissors"]
+    var winningChoices = ["Paper", "Scissors", "Rock"]
+    var losingChoices = ["Scissors", "Rock", "Paper"]
     var body: some View {
+        
         NavigationView {
-            VStack {
-                Text("")
-                    .bold()
+            ZStack {
+                LinearGradient(colors: [.blue, .cyan, .gray], startPoint: .bottom, endPoint: .top)
+                    .ignoresSafeArea()
                 
                 VStack {
-                    Text("Select Your Answer!")
+                    Text("Your score is \(points)")
                         .padding()
-                    HStack(spacing: 5) {
-                        ForEach(0..<3) { rps in
-                            Button {
-                                choiceMade(rps)
-                            } label: {
-                                Image(choices[rps])
-                                    .resizable()
-                                    .frame(width: 100, height: 100)
-                            }
-
-                        }
+                    if wantsToWin == true {
+                        Text("Your opponent picked \(winningChoices[winningChoice]) and wants to win.")
+                            .bold()
+                    } else if wantsToWin == false {
+                        Text("Your opponent picked \(losingChoices[losingChoice]) and wants to lose.")
+                            .bold()
                     }
-                    .navigationBarTitle("Rock Paper Scissors")
+                    
+                    VStack {
+                        Text("Select Your Answer!")
+                            .padding()
+                        HStack(spacing: 5) {
+                            ForEach(0..<3) { choice in
+                                Button {
+                                    choiceMade(choice)
+                                } label: {
+                                    Image(choices[choice])
+                                        .resizable()
+                                        .frame(width: 100, height: 100)
+                                }
+                                
+                                
+                            }
+                            .navigationBarTitle("R P S", displayMode: .inline)
+                            
+                        }
+                        
+                    }
                 }
             }
         }
-    }
-    func choiceMade(_ choice: Int) {
-        if choice == winningChoice {
-            scoreTitle = "Nice!"
-            points += 1
-        } else {
-            scoreTitle = "R.I.P"
+        .alert(scoreTitle, isPresented: $showingScore) {
+            Button("Continue", action: askQuestion)
+        } message: {
+            Text("Your score is now \(points)")
         }
         
+    }
+    
+    func choiceMade(_ choice: Int) {
+        if wantsToWin == true {
+            if choice == winningChoice {
+                scoreTitle = "Nice!"
+                points += 1
+            } else {
+                scoreTitle = "Wrong, the correct answer was \(choices[winningChoice])"
+            }
+        }
+        if wantsToWin == false {
+            if choice == losingChoice {
+                scoreTitle = "Nice!"
+                points += 1
+            } else {
+                scoreTitle = "Wrong, the correct answer was \(choices[losingChoice])"
+            }
+        }
+        showingScore = true
         
+    }
+    
+    func askQuestion() {
+        wantsToWin = Bool.random()
+        winningChoice = Int.random(in: 0...2)
     }
 }
 struct ContentView_Previews: PreviewProvider {
